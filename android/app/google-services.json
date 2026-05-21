@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "882310849830",
+    "project_id": "gogames-a636c",
+    "storage_bucket": "gogames-a636c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:882310849830:android:aac66935e763ba664c0de7",
+        "android_client_info": {
+          "package_name": "com.example.flutter_the_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDacMUcjoBJ6zB3Huhv2Qjr5etQOW7tDFI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:882310849830:android:c14d5f6a622def934c0de7",
+        "android_client_info": {
+          "package_name": "com.example.gogames"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDacMUcjoBJ6zB3Huhv2Qjr5etQOW7tDFI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

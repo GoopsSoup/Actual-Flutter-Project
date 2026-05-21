@@ -1,0 +1,44 @@
+[
+  {
+    "id": "lies-of-p",
+    "title": "Lies of P",
+    "image": "lib/images/lies.jpg",
+    "innerImageUrls": ["lib/images/liesofpp.jpg", "lib/images/liesofps.jpg"],
+    "tags": ["Souls-like", "Action", "Dark fantasy", "Singleplayer"],
+    "rating": "4.6",
+    "reviewCount": "2.4k reviews",
+    "desc": "You are a puppet created by Geppetto who's caught in a web of l...",
+    "compDesc": "You are a puppet created by Geppetto who’s caught in a web of lies with unimaginable monsters and untrustworthy figures standing between you and the events that have befallen the world of Lies of P.You are awakened by a mysterious voice that guides you through the plagued city of Krat - a once lively place that has been poisoned by madness and bloodlust. In our soulslike, you must adapt yourself and your weapons to face untold horrors, untangle the unfathomable secrets of the city's elites and choose whether to confront predicaments with the truth or weave lies to overcome them on the journey to find yourself.",
+    "section": "featured",
+    "minimumRequirements": ["OS: Windows 10 64bit", "Memory: 8 GB RAM", "Storage: 50 GB"],
+    "recommendedRequirements": ["OS: Windows 10 64bit", "Memory: 16 GB RAM", "Storage: 50 GB"]
+  },
+  {
+    "id": "tlou-part-1",
+    "title": "The Last Of Us Part I",
+    "image": "lib/images/tlou.jpg",
+    "innerImageUrls": ["lib/images/tlou2.jpg"],
+    "tags": ["Story-Rich", "Zombies", "Action-Adventure"],
+    "rating": "4.8",
+    "reviewCount": "12k reviews",
+    "desc": "In a ravaged civilization, where infected and hardened survivors run rampant...",
+    "compDesc": "In a ravaged civilization, where infected and hardened survivors run rampant, Joel, a weary protagonist, is hired to smuggle 14-year-old Ellie out of a military quarantine zone. However, what starts as a small job soon transforms into a brutal cross-country journey.",
+    "section": "best_selling",
+    "minimumRequirements": ["OS: Windows 10", "Memory: 16 GB RAM"],
+    "recommendedRequirements": ["OS: Windows 11", "Memory: 32 GB RAM"]
+  },
+  {
+    "id": "helldivers-2",
+    "title": "Helldivers 2",
+    "image": "lib/images/helldivers2.jpg",
+    "innerImageUrls": ["lib/images/Hellimg1.jpg"],
+    "tags": ["Online Co-Op", "PvE", "Multiplayer"],
+    "rating": "4.4",
+    "reviewCount": "45k reviews",
+    "desc": "HELLDIVERS™ 2 is a 3rd person squad-based shooter that sees the el...",
+    "compDesc": "Freedom. Peace. Democracy.Your Super Earth-born rights. The key pillars of our civilization.Of our very existence.But the war rages on. And everything is once again under threat.Join the greatest military force the galaxy has ever seen and make this a safe and free place to live.",
+    "section": "best_selling",
+    "minimumRequirements": ["OS: Windows 10", "Memory: 8 GB RAM"],
+    "recommendedRequirements": ["OS: Windows 10", "Memory: 16 GB RAM"]
+  }
+]
