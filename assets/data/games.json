@@ -40,5 +40,33 @@
     "section": "best_selling",
     "minimumRequirements": ["OS: Windows 10", "Memory: 8 GB RAM"],
     "recommendedRequirements": ["OS: Windows 10", "Memory: 16 GB RAM"]
+  },
+  {
+    "id": "remnant",
+    "title": "Remnant 2",
+    "image": "lib/images/remnant.jpg",
+    "innerImageUrls": ["lib/images/remnantGame.jpg"],
+    "tags": ["Rpg", "Souls-like", "Action"],
+    "rating": "4.4",
+    "reviewCount": "12k reviews",
+    "desc": "Remnant II® is the sequel to the best-selling game Remnant: Fr...",
+    "compDesc": "Remnant II® is the sequel to the best-selling game Remnant: From the Ashes that pits survivors of humanity against new deadly creatures and god-like bosses across terrifying worlds. Play solo or co-op with two other friends to explore the depths of the unknown to stop an evil from destroying reality itself. To succeed, players will need to rely on their own skills and those of their team to overcome the toughest challenges and to stave off humanity’s extinction. A mix of methodical and frenetic ranged/melee combat returns with cunning enemies and large scale boss battles. Choose specific gear and weapons to optimize for the different biomes and battles ahead. Bosses will bring high-level players to team up to overcome the challenge and try to obtain the biggest rewards",
+    "section": "best_selling",
+    "minimumRequirements": ["OS: Windows 10", "Memory: 16 GB RAM", "Processor: Intel Core i5-7600 / AMD Ryzen 5 2600", "Storage: 80 GB available space", "Graphics: GeForce GTX 1650 / AMD Radeon RX 590"],
+    "recommendedRequirements": ["OS: Windows 10", "Memory: 16 GB RAM"]
+  },
+  {
+    "id": "sifu",
+    "title": "Sifu",
+    "image": "lib/images/sifu.jpg",
+    "innerImageUrls": ["lib/images/sifuGame1.jpg", "lib/images/sifuGame2.jpg"],
+    "tags": ["Martial arts", "Difficult", "Action"],
+    "rating": "4.9",
+    "reviewCount": "2.8k reviews",
+    "desc": "Sifu is a realistic third-person brawler with tight Kung Fu combat mec...",
+    "compDesc": "Itching for some more good ol' Kung Fu action? The free Arenas expansion adds multiple hours of gameplay that will put your Kung Fu to the test. With 5 new game modes, 15 dynamic locations and 120 challenges, gear up for spectacular combats, brutal opponents, and endless opportunities to refine your moves. Whether you choose to play as a male or a female character, in Sifu, you will ponder that question on your path for revenge, hunting down your family’s assassins. One against all, you have no allies, countless enemies, and a mysterious amulet to bring you back to life every time you die. Yet, be warned! Your secret weapon comes with a hefty price to pay: aging and its consequences.",
+    "section": "best_selling",
+    "minimumRequirements": ["OS: Windows 10", "Memory: 16 GB RAM", "Processor: Intel Core i5-7600 / AMD Ryzen 5 2600", "Storage: 80 GB available space", "Graphics: GeForce GTX 1650 / AMD Radeon RX 590"],
+    "recommendedRequirements": ["OS: Windows 10", "Memory: 16 GB RAM"]
   }
 ]

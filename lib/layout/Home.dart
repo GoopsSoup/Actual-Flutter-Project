@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_last_app/layout/GamePage.dart';
+import 'MyGame.dart';
 import 'Games.dart'; 
 import 'Profile.dart';
 import 'Auth.dart';
+import 'Wishlist.dart';
 
 class Home extends StatelessWidget {
   const Home({super.key});
@@ -38,6 +40,8 @@ void _executeProtectedAction(BuildContext context, VoidCallback action) {
   }
 }
 
+// ─── Main Shell with Bottom Navigation Bar ───────────────────────────────────
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -46,6 +50,54 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  int _currentIndex = 0;
+
+  // The pages for our bottom navigation destinations
+  final List<Widget> _pages = [
+    const _HomeCatalog(),
+    const Wishlist(),
+    const MyGame(),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF1A1A1A),
+      body: SafeArea(
+        child: IndexedStack(
+          index: _currentIndex,
+          children: _pages,
+        ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) => setState(() => _currentIndex = index),
+        backgroundColor: const Color(0xFF151515),
+        selectedItemColor: const Color(0xFFE53935), // Red accent to match your titles
+        unselectedItemColor: const Color(0xFF888888),
+        showSelectedLabels: true,
+        showUnselectedLabels: true,
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.favorite_border), activeIcon: Icon(Icons.favorite), label: 'Wishlist'),
+          BottomNavigationBarItem(icon: Icon(Icons.sports_esports_outlined), activeIcon: Icon(Icons.sports_esports), label: 'My Games'),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Extracted Home Catalog Layout ──────────────────────────────────────────
+
+class _HomeCatalog extends StatefulWidget {
+  const _HomeCatalog();
+
+  @override
+  State<_HomeCatalog> createState() => _HomeCatalogState();
+}
+
+class _HomeCatalogState extends State<_HomeCatalog> {
   late Future<List<GameModel>> _gamesFuture;
 
   @override
@@ -62,58 +114,53 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFF1A1A1A),
-      body: SafeArea(
-        child: FutureBuilder<List<GameModel>>(
-          future: _gamesFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            if (snapshot.hasError || !snapshot.hasData) {
-              return const Center(child: Text("Error loading catalog data"));
-            }
+    return FutureBuilder<List<GameModel>>(
+      future: _gamesFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError || !snapshot.hasData) {
+          return const Center(child: Text("Error loading catalog data"));
+        }
 
-            final allGames = snapshot.data!;
+        final allGames = snapshot.data!;
 
-            final featuredGame = allGames.firstWhere(
-              (g) => g.section == 'featured',
-              orElse: () => allGames.first,
-            );
-            final bestSellingGames = allGames.where((g) => g.section == 'best_selling').toList();
+        final featuredGame = allGames.firstWhere(
+          (g) => g.section == 'featured',
+          orElse: () => allGames.first,
+        );
+        final bestSellingGames = allGames.where((g) => g.section == 'best_selling').toList();
 
-            return SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const _SearchBar(),
-                  const SizedBox(height: 24),
+        return SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const _SearchBar(),
+              const SizedBox(height: 24),
 
-                  const _SectionTitle(title: 'Today Recommendation'),
-                  const SizedBox(height: 12),
-                  _FeaturedGameCard(game: featuredGame),
+              const _SectionTitle(title: 'Today Recommendation'),
+              const SizedBox(height: 12),
+              _FeaturedGameCard(game: featuredGame),
 
-                  const SizedBox(height: 32),
+              const SizedBox(height: 32),
 
-                  const _SectionTitle(title: 'Popular'),
-                  const SizedBox(height: 12),
-                  const _PopularGamesRow(),
+              const _SectionTitle(title: 'Popular'),
+              const SizedBox(height: 12),
+              const _PopularGamesRow(),
 
-                  const SizedBox(height: 32),
+              const SizedBox(height: 32),
 
-                  const _SectionTitle(title: 'Best Selling'),
-                  const SizedBox(height: 12),
-                  _BestSellingList(games: bestSellingGames),
+              const _SectionTitle(title: 'Best Selling'),
+              const SizedBox(height: 12),
+              _BestSellingList(games: bestSellingGames),
 
-                  const SizedBox(height: 32),
-                  const _Footer(),
-                ],
-              ),
-            );
-          },
-        ),
-      ),
+              const SizedBox(height: 32),
+              const _Footer(),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -183,9 +230,7 @@ class _SearchBar extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          
-          // Fixed: Wrapped in a StreamBuilder so the login button swaps out 
-          // instantly when the user finishes authenticating.
+
           StreamBuilder<User?>(
             stream: FirebaseAuth.instance.authStateChanges(),
             builder: (context, snapshot) {

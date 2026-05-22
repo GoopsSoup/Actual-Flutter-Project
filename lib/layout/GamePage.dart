@@ -29,6 +29,17 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
       backgroundColor: const Color(0xFF2A2A2A),
       body: CustomScrollView(
         slivers: [
+          SliverAppBar(
+            pinned: true,
+            backgroundColor: const Color(0xFF2A2A2A),
+            elevation: 0,
+            title: Text(
+              game.title, 
+              style: const TextStyle(color: Colors.white, fontSize: 18),
+            ),
+            // Optional: Add a back button or actions if needed
+            leading: const BackButton(color: Colors.white), 
+          ),
           SliverToBoxAdapter(child: _HeroBanner(title: game.title, imagePath: game.image)),
           SliverToBoxAdapter(
             child: Padding(
@@ -168,27 +179,6 @@ class _HeroBanner extends StatelessWidget {
           child: SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.black38,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(Icons.arrow_back_ios_new_rounded,
-                          color: Colors.white, size: 16),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    title,
-                    style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w700),
-                  ),
-                ],
-              ),
             ),
           ),
         ),
