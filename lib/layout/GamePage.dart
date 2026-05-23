@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'Pay.dart';
-import 'Games.dart'; // Make sure this path matches your file structure
+import 'Games.dart'; 
+import 'WishlistService.dart'; // Ensure your service is imported
 
 final _bodyStyle = TextStyle(
   color: Colors.white.withOpacity(0.7),
@@ -9,7 +10,7 @@ final _bodyStyle = TextStyle(
 );
 
 class GamePage extends StatefulWidget {
-  final GameModel game; // Accepts the game object dynamically
+  final GameModel game; 
 
   const GamePage({super.key, required this.game});
 
@@ -18,11 +19,10 @@ class GamePage extends StatefulWidget {
 }
 
 class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin {
-  bool _wishlisted = false;
+  final WishlistService _wishlistService = WishlistService();
 
   @override
   Widget build(BuildContext context) {
-    // Shortcuts to make accessing the model properties cleaner
     final game = widget.game;
 
     return Scaffold(
@@ -37,10 +37,14 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
               game.title, 
               style: const TextStyle(color: Colors.white, fontSize: 18),
             ),
-            // Optional: Add a back button or actions if needed
             leading: const BackButton(color: Colors.white), 
           ),
-          SliverToBoxAdapter(child: _HeroBanner(title: game.title, imagePath: game.image)),
+          
+          // FIXED: Enforced structured constraints for the Hero banner area
+          SliverToBoxAdapter(
+            child: _HeroBanner(title: game.title, imagePath: game.image),
+          ),
+          
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -57,11 +61,15 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                     children: [
                       const Icon(Icons.star_rounded, color: Color(0xFFFFCC00), size: 16),
                       const SizedBox(width: 4),
-                      Text(game.rating,
-                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14)),
+                      Text(
+                        game.rating,
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 14),
+                      ),
                       const SizedBox(width: 4),
-                      Text('(${game.reviewCount})',
-                          style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 12)),
+                      Text(
+                        '(${game.reviewCount})',
+                        style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 12),
+                      ),
                     ],
                   ),
                 ],
@@ -75,9 +83,26 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                 children: [
                   const Expanded(child: _BuyButton()),
                   const SizedBox(width: 10),
-                  _WishlistButton(
-                    active: _wishlisted,
-                    onTap: () => setState(() => _wishlisted = !_wishlisted),
+                  
+                  // Integrated the Firestore Stream builder cleanly here
+                  StreamBuilder<bool>(
+                    stream: _wishlistService.isWishlistedStream(game.id.toString()),
+                    initialData: false,
+                    builder: (context, snapshot) {
+                      final isBookmarked = snapshot.data ?? false;
+                      return _WishlistButton(
+                        active: isBookmarked,
+                        onTap: () async {
+                          try {
+                            await _wishlistService.toggleWishlist(game, isBookmarked);
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text(e.toString())),
+                            );
+                          }
+                        },
+                      );
+                    },
                   ),
                 ],
               ),
@@ -98,12 +123,14 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                   ),
                   const SizedBox(height: 16),
                   
-                  // Maps inner screenshot images if they exist in your model
                   if (game.innerImageUrls.isNotEmpty) ...[
                     ...game.innerImageUrls.map((imageUrl) => Padding(
                       padding: const EdgeInsets.only(bottom: 16),
-                      child: Center(
-                        child: Image.asset(imageUrl),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: imageUrl.startsWith('http')
+                            ? Image.network(imageUrl)
+                            : Image.asset(imageUrl),
                       ),
                     )),
                   ],
@@ -159,7 +186,7 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
   }
 }
 
-// ── Hero Banner ───────────────────────────────────────────────────────────────
+// ── REFACTORED Hero Banner (Handles Assets, URLs, and Aspect Ratio Constraints) ──
 
 class _HeroBanner extends StatelessWidget {
   final String title;
@@ -169,20 +196,56 @@ class _HeroBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Center(
-          child: Image.asset(imagePath),
-        ),
-        Positioned(
-          top: 0, left: 0, right: 0,
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    // Determine dynamically if image source is web or local asset folder
+    final isNetworkImage = imagePath.startsWith('http://') || imagePath.startsWith('https://');
+
+    return AspectRatio(
+      aspectRatio: 16 / 9, // Forces standard gaming wide landscape format layout ratios
+      child: Container(
+        width: double.infinity,
+        color: const Color(0xFF1A1A1A), // Fallback dark tone placeholder while background renders
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            isNetworkImage
+                ? Image.network(
+                    imagePath,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => const Center(
+                      child: Icon(Icons.broken_image_outlined, color: Colors.white24, size: 40),
+                    ),
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return const Center(
+                        child: CircularProgressIndicator(color: Color(0xFFFF3B30), strokeWidth: 2),
+                      );
+                    },
+                  )
+                : Image.asset(
+                    imagePath,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => const Center(
+                      child: Icon(Icons.image_not_supported_outlined, color: Colors.white24, size: 40),
+                    ),
+                  ),
+            
+            // Subtle premium ambient overlay vignette to blend image into background smoothly
+            Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    Colors.transparent,
+                    Color(0xFF2A2A2A), // Matches screen's background color
+                  ],
+                ),
+              ),
             ),
-          ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }
@@ -242,7 +305,7 @@ class _BuyButtonState extends State<_BuyButton> {
         ),
         child: TextButton(
           style: TextButton.styleFrom(
-            minimumSize: Size.infinite, // Ensures the button expands to fill the container click zone
+            minimumSize: Size.infinite, 
           ),
           onPressed: () {
             Navigator.push(
@@ -253,7 +316,7 @@ class _BuyButtonState extends State<_BuyButton> {
           child: const Text(
             'Buy',
             style: TextStyle(
-              color: Colors.white, // Explicitly white text so it doesn't default to invisible blue
+              color: Colors.white, 
               fontWeight: FontWeight.w700,
               fontSize: 15,
             ),

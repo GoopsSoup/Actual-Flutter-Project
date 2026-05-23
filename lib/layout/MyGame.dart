@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'Profile.dart';
 
 class MyGame extends StatelessWidget {
   const MyGame({super.key});
@@ -28,17 +27,6 @@ class MyGame extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               child: Row(
                 children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context, 
-                        MaterialPageRoute(builder: (context) => const Profile()
-                        ),
-                      );
-                    },
-                    child: const Icon(Icons.arrow_back_ios_new_rounded,
-                        color: Colors.white, size: 18),
-                  ),
                   const SizedBox(width: 14),
                   const Text(
                     'My games',

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_last_app/layout/MyGame.dart';
-import 'package:flutter_last_app/layout/Wishlist.dart';
 import 'package:flutter_last_app/layout/Friend.dart';
 import 'package:flutter_last_app/layout/Home.dart';
 
@@ -62,7 +60,7 @@ class Profile extends StatelessWidget {
             ),
           ),
 
-          // Avatar + stats
+          // Avatar + stats (Great to keep as a visual dashboard!)
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 24),
@@ -88,27 +86,45 @@ class Profile extends StatelessWidget {
             ),
           ),
 
-          // Library Section
+          // Social Section
           SliverToBoxAdapter(
-            child: _Section(title: 'Library', children: [
-              _MenuTile(icon: Icons.sports_esports_rounded, label: 'My Games',
-                  trailing: '38', trailingColor: kGreen, onTap: () => _goTo(context, const MyGame())),
-              _MenuTile(icon: Icons.group_rounded, label: 'Friends',
-                  trailing: '12 online', trailingColor: kGreen, onTap: () => _goTo(context, const Friend())),
-              _MenuTile(icon: Icons.bookmark_rounded, label: 'Wishlist',
-                  trailing: '7', onTap: () => _goTo(context, const Wishlist()), showDivider: false),
+            child: _Section(title: 'Social', children: [
+              _MenuTile(
+                icon: Icons.group_rounded, 
+                label: 'Friends List',
+                trailing: '12 online', 
+                trailingColor: kGreen, 
+                onTap: () => _goTo(context, const Friend()),
+                showDivider: false,
+              ),
             ]),
           ),
 
           const SliverToBoxAdapter(child: SizedBox(height: 12)),
 
-          // Account Section (Just displays info now with no action)
+          // Account Section 
           SliverToBoxAdapter(
-            child: _Section(title: 'Account', children: [
+            child: _Section(title: 'Account Info', children: [
               _MenuTile(icon: Icons.mail_outline_rounded, label: emailDisplay, showArrow: false, onTap: () {}),
-              _MenuTile(icon: Icons.lock_outline_rounded, label: '•••••••••••••', showArrow: false,
-                  labelStyle: const TextStyle(color: Colors.white70, fontSize: 18, letterSpacing: 2),
-                  onTap: () {}, showDivider: false),
+              _MenuTile(
+                icon: Icons.lock_outline_rounded, 
+                label: '•••••••••••••', 
+                showArrow: false,
+                labelStyle: const TextStyle(color: Colors.white70, fontSize: 18, letterSpacing: 2),
+                onTap: () {}, 
+                showDivider: false
+              ),
+            ]),
+          ),
+
+          const SliverToBoxAdapter(child: SizedBox(height: 12)),
+
+          // Settings & Preferences
+          SliverToBoxAdapter(
+            child: _Section(title: 'App Settings', children: [
+              _MenuTile(icon: Icons.credit_card_rounded, label: 'Payment Methods', onTap: () {}),
+              _MenuTile(icon: Icons.notifications_none_rounded, label: 'Push Notifications', onTap: () {}),
+              _MenuTile(icon: Icons.help_outline_rounded, label: 'Help & Support', onTap: () {}, showDivider: false),
             ]),
           ),
 
@@ -192,7 +208,7 @@ class _MenuTile extends StatelessWidget {
   final Color? trailingColor;
   final VoidCallback onTap;
   final bool showDivider;
-  final bool showArrow; // Added to hide chevron dynamically
+  final bool showArrow;
 
   const _MenuTile({
     required this.icon, required this.label, required this.onTap,
