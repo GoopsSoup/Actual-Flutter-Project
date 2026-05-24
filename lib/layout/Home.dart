@@ -56,7 +56,7 @@ class _HomePageState extends State<HomePage> {
   final List<Widget> _pages = [
     const _HomeCatalog(),
     const Wishlist(),
-    const MyGame(),
+    MyGame(),
   ];
 
   @override

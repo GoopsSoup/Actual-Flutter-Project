@@ -47,37 +47,6 @@ class _WishlistPageState extends State<Wishlist> {
     );
   }
 
-  void _addNoteGame(String id, String? currentNote) async {
-    final ctrl = TextEditingController(text: currentNote ?? '');
-    final result = await showDialog<String>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1A1A),
-        title: const Text('Add note', style: TextStyle(color: Colors.white)),
-        content: TextField(
-          controller: ctrl,
-          autofocus: true,
-          maxLines: 3,
-          style: const TextStyle(color: Colors.white),
-          decoration: const InputDecoration(
-            hintText: 'e.g. Buy on sale, play co-op…',
-            hintStyle: TextStyle(color: Colors.white38),
-            enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFF333333))),
-            focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFFE8C46A))),
-          ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('CANCEL', style: TextStyle(color: Colors.white38))),
-          TextButton(onPressed: () => Navigator.pop(ctx, ctrl.text), child: const Text('SAVE', style: TextStyle(color: Color(0xFFE8C46A), fontWeight: FontWeight.bold))),
-        ],
-      ),
-    );
-    
-    if (result != null) {
-      await _wishlistService.updateNote(id, result.trim().isEmpty ? null : result.trim());
-    }
-  }
-
   void _showOptions(String id, String title, String? note, Map<String, dynamic> rawMap) {
     showModalBottomSheet(
       context: context,
@@ -97,14 +66,6 @@ class _WishlistPageState extends State<Wishlist> {
               child: Text(title, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
             ),
             const Divider(color: Colors.white12, height: 1),
-            _BottomSheetTile(
-              icon: Icons.sticky_note_2_outlined,
-              label: note == null ? 'Add note' : 'Edit note',
-              onTap: () {
-                Navigator.pop(ctx);
-                _addNoteGame(id, note);
-              },
-            ),
             _BottomSheetTile(
               icon: Icons.delete_outline,
               label: 'Remove from wishlist',

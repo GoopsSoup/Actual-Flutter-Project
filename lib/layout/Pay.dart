@@ -3,6 +3,7 @@ import 'package:flutter_last_app/payment/Venmo.dart';
 import 'package:flutter_last_app/payment/Dana.dart';
 import 'package:flutter_last_app/payment/Paypal.dart';
 import 'package:flutter_last_app/payment/Bank.dart';
+import 'package:flutter_last_app/layout/Games.dart'; // Imports GameModel
 
 const _bg = Color(0xFF0A0A0A);
 const _card = Color(0xFF1E1E1E);
@@ -10,8 +11,11 @@ const _border = Color(0xFF2A2A2A);
 const _green = Color(0xFF39FF14);
 
 class Payment extends StatefulWidget {
-  final String gameName;
-  const Payment({super.key, this.gameName = 'Lies Of P'});
+  // 1. Pass the full GameModel object here instead of a plain string
+  final GameModel gameToBuy;
+
+  const Payment({super.key, required this.gameToBuy});
+
   @override
   State<Payment> createState() => _PaymentPageState();
 }
@@ -30,11 +34,13 @@ class _PaymentPageState extends State<Payment> {
 
   void _onPurchase() {
     if (_selected == null) return;
+    
+    // 2. We remove 'const' from BankPage because widget.gameToBuy is a runtime value
     final page = switch (_selected) {
-      'paypal' => const PaypalPage(),
-      'dana'   => const DanaPage(),
-      'venmo'  => const VenmoPage(),
-      'bank'   => const BankPage(),
+      'paypal' => PaypalPage(gameToBuy: widget.gameToBuy),
+      'dana'   => DanaPage(gameToBuy: widget.gameToBuy),
+      'venmo'  => VenmoPage(gameToBuy: widget.gameToBuy),
+      'bank'   => BankPage(gameToBuy: widget.gameToBuy), // Passes the game model object directly
       _        => null,
     };
     if (page != null) Navigator.push(context, MaterialPageRoute(builder: (_) => page));
@@ -63,7 +69,8 @@ class _PaymentPageState extends State<Payment> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('You are purchasing ${widget.gameName}',
+            // Uses widget.gameToBuy details to populate text fields seamlessly
+            Text('You are purchasing ${widget.gameToBuy.title}',
                 style: const TextStyle(color: Colors.white, fontSize: 14)),
             const SizedBox(height: 16),
             const Text('Verify your information and click Purchase',

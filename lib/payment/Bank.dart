@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_last_app/payment/Success.dart';
+import 'package:flutter_last_app/layout/Games.dart'; // Make sure path points to your GameModel file
+import 'package:flutter_last_app/layout/MyGamesService.dart';
 
 class BankPage extends StatefulWidget {
-  const BankPage({super.key});
+  final GameModel gameToBuy;
+
+  const BankPage({super.key, required this.gameToBuy});
 
   @override
   State<BankPage> createState() => _BankPageState();
@@ -10,6 +14,8 @@ class BankPage extends StatefulWidget {
 
 class _BankPageState extends State<BankPage> {
   String _country = 'Indonesia';
+  bool _isProcessing = false;
+  final MyGamesService _gamesService = MyGamesService();
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +49,9 @@ class _BankPageState extends State<BankPage> {
             _label('Phone number'),
             _field('+1 222 222 22 2', keyboardType: TextInputType.phone),
             const SizedBox(height: 32),
-            _continueBtn(),
+            _isProcessing 
+                ? const Center(child: CircularProgressIndicator(color: Colors.white))
+                : _continueBtn(),
           ],
         ),
       ),
@@ -66,6 +74,51 @@ class _BankPageState extends State<BankPage> {
               .toList(),
         ),
       );
+
+  Widget _continueBtn() {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: _isProcessing 
+            ? null // Prevents accidental double-tapping while writing data
+            : () async {
+                setState(() => _isProcessing = true);
+                try {
+                  // 1. Write purchase record passing the entire object cleanly
+                  await _gamesService.purchaseGame(widget.gameToBuy);
+
+                  if (!mounted) return;
+
+                  // 2. Head to success screen
+                  Navigator.pushReplacement( // Use pushReplacement so they can't hit 'back' to pay again
+                    context,
+                    MaterialPageRoute(builder: (context) => const SuccessPage()),
+                  );
+                } catch (e) {
+                  if (!mounted) return;
+                  setState(() => _isProcessing = false);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Payment failure: ${e.toString()}')),
+                  );
+                }
+              },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black,
+          disabledBackgroundColor: Colors.white30,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        child: _isProcessing
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(color: Colors.black, strokeWidth: 2),
+              )
+            : const Text('Continue', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+      ),
+    );
+  }
 }
 
 Widget _label(String text) => Padding(
@@ -82,27 +135,5 @@ Widget _field(String hint, {TextInputType? keyboardType}) => TextField(
         filled: true,
         fillColor: const Color(0xFF1A1A1A),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-      ),
-    );
-
-Widget _continueBtn() => Builder(
-      builder: (context) => SizedBox(
-        width: double.infinity,
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const SuccessPage()
-              ),
-            );
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.white,
-            foregroundColor: Colors.black,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          ),
-          child: const Text('Continue', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-        ),
       ),
     );

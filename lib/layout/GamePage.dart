@@ -81,7 +81,8 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               child: Row(
                 children: [
-                  const Expanded(child: _BuyButton()),
+                  // FIXED: Passed the current game instance straight into the Buy button
+                  Expanded(child: _BuyButton(gameToBuy: game)),
                   const SizedBox(width: 10),
                   
                   // Integrated the Firestore Stream builder cleanly here
@@ -196,14 +197,13 @@ class _HeroBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Determine dynamically if image source is web or local asset folder
     final isNetworkImage = imagePath.startsWith('http://') || imagePath.startsWith('https://');
 
     return AspectRatio(
-      aspectRatio: 16 / 9, // Forces standard gaming wide landscape format layout ratios
+      aspectRatio: 16 / 9, 
       child: Container(
         width: double.infinity,
-        color: const Color(0xFF1A1A1A), // Fallback dark tone placeholder while background renders
+        color: const Color(0xFF1A1A1A), 
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -229,7 +229,6 @@ class _HeroBanner extends StatelessWidget {
                     ),
                   ),
             
-            // Subtle premium ambient overlay vignette to blend image into background smoothly
             Container(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
@@ -238,7 +237,7 @@ class _HeroBanner extends StatelessWidget {
                   colors: [
                     Colors.transparent,
                     Colors.transparent,
-                    Color(0xFF2A2A2A), // Matches screen's background color
+                    Color(0xFF2A2A2A), 
                   ],
                 ),
               ),
@@ -271,10 +270,12 @@ class _Tag extends StatelessWidget {
   }
 }
 
-// ── Buy Button ────────────────────────────────────────────────────────────────
+// ── Buy Button (FIXED Layout & Variable Routing) ──────────────────────────────
 
 class _BuyButton extends StatefulWidget {
-  const _BuyButton();
+  final GameModel gameToBuy; // 1. Added variable to hold passed model info
+
+  const _BuyButton({required this.gameToBuy});
 
   @override
   State<_BuyButton> createState() => _BuyButtonState();
@@ -310,7 +311,10 @@ class _BuyButtonState extends State<_BuyButton> {
           onPressed: () {
             Navigator.push(
               context, 
-              MaterialPageRoute(builder: (context) => const Payment()),
+              MaterialPageRoute(
+                // 2. Access via widget context and fixed missing parenthesis syntax error
+                builder: (context) => Payment(gameToBuy: widget.gameToBuy),
+              ),
             );
           }, 
           child: const Text(

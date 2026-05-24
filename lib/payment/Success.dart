@@ -35,7 +35,7 @@ class SuccessPage extends StatelessWidget {
               _btn('View in library', onTap: () {
                 Navigator.push(
                   context, 
-                  MaterialPageRoute(builder: (context) => const MyGame()
+                  MaterialPageRoute(builder: (context) => MyGame()
                   ),
                 );
               }),
