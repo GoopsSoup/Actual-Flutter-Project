@@ -1,12 +1,15 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_last_app/layout/Home.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 
 const _green = Color(0xFF4CAF50);
 
 class AuthService {
   final FirebaseAuth auth = FirebaseAuth.instance;
+  final FirebaseFirestore _db = FirebaseFirestore.instance; // Added Firestore Reference
 
   Future<User?> login(String email, String password) async {
     try {
@@ -16,20 +19,24 @@ class AuthService {
       );
       return result.user;
     } on FirebaseAuthException catch (e) {
-      // Catch specific Firebase errors to show user-friendly messages
-      if (e.code == 'user-not-found') {
-        throw 'No user found for that email.';
-      } else if (e.code == 'wrong-password') {
-        throw 'Wrong password provided.';
-      } else if (e.code == 'invalid-email') {
-        throw 'The email address is badly formatted.';
-      }
+      if (e.code == 'user-not-found') throw 'No user found for that email.';
+      if (e.code == 'wrong-password') throw 'Wrong password provided.';
+      if (e.code == 'invalid-email') throw 'The email address is badly formatted.';
       throw e.message ?? 'An unknown error occurred';
     }
   }
 
-  Future<User?> register(String email, String password, String name) async {
+  Future<User?> register(String email, String password, String username) async {
     try {
+      // 1. Prevent creation if the username is already taken by checking Firestore
+      final takenCheck = await _db.collection('users')
+          .where('username_lowercase', isEqualTo: username.toLowerCase().trim())
+          .get();
+      
+      if (takenCheck.docs.isNotEmpty) {
+        throw 'This username is already taken.';
+      }
+
       final result = await auth.createUserWithEmailAndPassword(
         email: email, 
         password: password
@@ -38,22 +45,24 @@ class AuthService {
       final user = result.user;
       
       if (user != null) {
-        // FIX: Update the name inside Firebase Auth
-        await user.updateDisplayName(name);
-        
-        // Refresh the user data so the local app sees the new name immediately
+        await user.updateDisplayName(username);
         await user.reload();
+
+        // 2. Save User information to Firestore for lookup queries
+        await _db.collection('users').doc(user.uid).set({
+          'uid': user.uid,
+          'username': username,
+          'username_lowercase': username.toLowerCase().trim(),
+          'email': email,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
       }
       
       return auth.currentUser;
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'weak-password') {
-        throw 'Password is to weak';
-      } else if (e.code == 'email-already-in-user') {
-        throw 'An account is already exist for that email';
-      } else if (e.code == 'invalid-email') {
-        throw 'Invalid email';
-      } 
+      if (e.code == 'weak-password') throw 'Password is too weak';
+      if (e.code == 'email-already-in-use') throw 'An account already exists for that email';
+      if (e.code == 'invalid-email') throw 'Invalid email';
       throw e.message ?? 'Unknown error';
     }
   }

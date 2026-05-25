@@ -31,14 +31,6 @@ class Home extends StatelessWidget {
   }
 }
 
-void _executeProtectedAction(BuildContext context, VoidCallback action) {
-  final user = FirebaseAuth.instance.currentUser;
-  if (user == null) {
-    _showSignInPopup(context);
-  } else {
-    action();
-  }
-}
 
 // ─── Main Shell with Bottom Navigation Bar ───────────────────────────────────
 
@@ -167,32 +159,7 @@ class _HomeCatalogState extends State<_HomeCatalog> {
 
 // ─── Pop-up Dialog ───────────────────────────────────────────────────────────
 
-void _showSignInPopup(BuildContext parentContext) {
-  showDialog(
-    context: parentContext,
-    builder: (dialogContext) => AlertDialog(
-      backgroundColor: const Color(0xFF1C1C1E),
-      title: const Text('Sign In Required'),
-      content: const Text('You need to be signed in to access this feature.'),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(dialogContext),
-          child: const Text('Cancel', style: TextStyle(color: Colors.white)),
-        ),
-        TextButton(
-          onPressed: () {
-            Navigator.pop(dialogContext);
-            Navigator.push(
-              parentContext,
-              MaterialPageRoute(builder: (_) => const SignInPage())
-            );
-          },
-          child: const Text('Sign In', style: TextStyle(color: Color(0xFFFF3B30), fontWeight: FontWeight.bold)),
-        ),
-      ],
-    ),
-  );
-}
+
 
 // ─── Search Bar (Reactive to Auth Changes) ────────────────────────────────────
 
@@ -374,14 +341,13 @@ class _BuyButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return OutlinedButton(
       onPressed: () {
-        _executeProtectedAction(context, () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => GamePage(game: game),
-            ),
-          );
-        });
+        // Direct navigation without the redundant GestureDetector
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => GamePage(game: game),
+          ),
+        );
       },
       style: OutlinedButton.styleFrom(
         side: const BorderSide(color: Colors.white, width: 1.2),

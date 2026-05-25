@@ -76,11 +76,7 @@ class Profile extends StatelessWidget {
                     style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 20),
                 Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  const _StatChip(label: 'Games',   value: '38'),
-                  _vDivider(),
-                  const _StatChip(label: 'Friends',  value: '12'),
-                  _vDivider(),
-                  const _StatChip(label: 'Wishlist', value: '7'),
+                  const _StatChip(label: 'Friends'),
                 ]),
               ]),
             ),
@@ -92,8 +88,6 @@ class Profile extends StatelessWidget {
               _MenuTile(
                 icon: Icons.group_rounded, 
                 label: 'Friends List',
-                trailing: '12 online', 
-                trailingColor: kGreen, 
                 onTap: () => _goTo(context, const Friend()),
                 showDivider: false,
               ),
@@ -114,17 +108,6 @@ class Profile extends StatelessWidget {
                 onTap: () {}, 
                 showDivider: false
               ),
-            ]),
-          ),
-
-          const SliverToBoxAdapter(child: SizedBox(height: 12)),
-
-          // Settings & Preferences
-          SliverToBoxAdapter(
-            child: _Section(title: 'App Settings', children: [
-              _MenuTile(icon: Icons.credit_card_rounded, label: 'Payment Methods', onTap: () {}),
-              _MenuTile(icon: Icons.notifications_none_rounded, label: 'Push Notifications', onTap: () {}),
-              _MenuTile(icon: Icons.help_outline_rounded, label: 'Help & Support', onTap: () {}, showDivider: false),
             ]),
           ),
 
@@ -162,13 +145,11 @@ Widget _vDivider() => Container(
 );
 
 class _StatChip extends StatelessWidget {
-  final String label, value;
-  const _StatChip({required this.label, required this.value});
+  final String label;
+  const _StatChip({required this.label});
 
   @override
   Widget build(BuildContext context) => Column(children: [
-    Text(value, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w800)),
-    const SizedBox(height: 2),
     Text(label, style: TextStyle(color: Colors.white.withOpacity(0.45), fontSize: 12)),
   ]);
 }

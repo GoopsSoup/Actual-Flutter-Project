@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'Pay.dart';
 import 'Games.dart'; 
-import 'WishlistService.dart'; // Ensure your service is imported
+import 'WishlistService.dart';
+import 'package:flutter/services.dart'; 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'Auth.dart'; // Ensure your service is imported
 
 final _bodyStyle = TextStyle(
   color: Colors.white.withOpacity(0.7),
@@ -16,6 +19,42 @@ class GamePage extends StatefulWidget {
 
   @override
   State<GamePage> createState() => _GamePageState();
+}
+
+// FIXED: Converted this to a proper Widget Wrapper that returns a GestureDetector
+class ProtectedActionWrapper extends StatelessWidget {
+  final Widget child;
+  final VoidCallback onTap;
+  final ValueChanged<TapDownDetails>? onTapDown;
+  final ValueChanged<TapUpDetails>? onTapUp;
+  final VoidCallback? onTapCancel;
+
+  const ProtectedActionWrapper({
+    super.key,
+    required this.child,
+    required this.onTap,
+    this.onTapDown,
+    this.onTapUp,
+    this.onTapCancel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: onTapDown,
+      onTapUp: onTapUp,
+      onTapCancel: onTapCancel,
+      onTap: () {
+        final user = FirebaseAuth.instance.currentUser;
+        if (user == null) {
+          _showSignInPopup(context);
+        } else {
+          onTap();
+        }
+      },
+      child: child,
+    );
+  }
 }
 
 class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin {
@@ -40,7 +79,6 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
             leading: const BackButton(color: Colors.white), 
           ),
           
-          // FIXED: Enforced structured constraints for the Hero banner area
           SliverToBoxAdapter(
             child: _HeroBanner(title: game.title, imagePath: game.image),
           ),
@@ -81,11 +119,9 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               child: Row(
                 children: [
-                  // FIXED: Passed the current game instance straight into the Buy button
                   Expanded(child: _BuyButton(gameToBuy: game)),
                   const SizedBox(width: 10),
                   
-                  // Integrated the Firestore Stream builder cleanly here
                   StreamBuilder<bool>(
                     stream: _wishlistService.isWishlistedStream(game.id.toString()),
                     initialData: false,
@@ -97,9 +133,11 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
                           try {
                             await _wishlistService.toggleWishlist(game, isBookmarked);
                           } catch (e) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(e.toString())),
-                            );
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(e.toString())),
+                              );
+                            }
                           }
                         },
                       );
@@ -187,8 +225,35 @@ class _GamePageState extends State<GamePage> with SingleTickerProviderStateMixin
   }
 }
 
-// ── REFACTORED Hero Banner (Handles Assets, URLs, and Aspect Ratio Constraints) ──
+void _showSignInPopup(BuildContext parentContext) {
+  showDialog(
+    context: parentContext,
+    builder: (dialogContext) => AlertDialog(
+      backgroundColor: const Color(0xFF1C1C1E),
+      title: const Text('Sign In Required'),
+      content: const Text('You need to be signed in to access this feature.'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(dialogContext),
+          child: const Text('Cancel', style: TextStyle(color: Colors.white)),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.pop(dialogContext);
+            // FIXED: Using parentContext cleanly to prevent pop-routing collision
+            Navigator.push(
+              parentContext,
+              MaterialPageRoute(builder: (_) => const SignInPage())
+            );
+          },
+          child: const Text('Sign In', style: TextStyle(color: Color(0xFFFF3B30), fontWeight: FontWeight.bold)),
+        ),
+      ],
+    ),
+  );
+}
 
+// ── Hero Banner ──
 class _HeroBanner extends StatelessWidget {
   final String title;
   final String imagePath;
@@ -249,8 +314,7 @@ class _HeroBanner extends StatelessWidget {
   }
 }
 
-// ── Tag ───────────────────────────────────────────────────────────────────────
-
+// ── Tag ──
 class _Tag extends StatelessWidget {
   final String label;
   const _Tag({required this.label});
@@ -270,10 +334,9 @@ class _Tag extends StatelessWidget {
   }
 }
 
-// ── Buy Button (FIXED Layout & Variable Routing) ──────────────────────────────
-
+// ── Buy Button ──
 class _BuyButton extends StatefulWidget {
-  final GameModel gameToBuy; // 1. Added variable to hold passed model info
+  final GameModel gameToBuy; 
 
   const _BuyButton({required this.gameToBuy});
 
@@ -286,10 +349,19 @@ class _BuyButtonState extends State<_BuyButton> {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    // FIXED: Swapped out broken functional checker call for the custom Widget Wrapper
+    return ProtectedActionWrapper(
       onTapDown: (_) => setState(() => _pressed = true),
       onTapUp: (_) => setState(() => _pressed = false),
       onTapCancel: () => setState(() => _pressed = false),
+      onTap: () {
+        Navigator.push(
+          context, 
+          MaterialPageRoute(
+            builder: (context) => Payment(gameToBuy: widget.gameToBuy),
+          ),
+        );
+      },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 110),
         height: 48,
@@ -304,20 +376,8 @@ class _BuyButtonState extends State<_BuyButton> {
               ? []
               : [BoxShadow(color: const Color(0xFFFF3B30).withOpacity(0.38), blurRadius: 16, offset: const Offset(0, 5))],
         ),
-        child: TextButton(
-          style: TextButton.styleFrom(
-            minimumSize: Size.infinite, 
-          ),
-          onPressed: () {
-            Navigator.push(
-              context, 
-              MaterialPageRoute(
-                // 2. Access via widget context and fixed missing parenthesis syntax error
-                builder: (context) => Payment(gameToBuy: widget.gameToBuy),
-              ),
-            );
-          }, 
-          child: const Text(
+        child: Center(
+          child: Text(
             'Buy',
             style: TextStyle(
               color: Colors.white, 
@@ -331,8 +391,7 @@ class _BuyButtonState extends State<_BuyButton> {
   }
 }
 
-// ── Wishlist Button ───────────────────────────────────────────────────────────
-
+// ── Wishlist Button ──
 class _WishlistButton extends StatelessWidget {
   final bool active;
   final VoidCallback onTap;
@@ -340,7 +399,8 @@ class _WishlistButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    // FIXED: Swapped out broken functional checker call for the custom Widget Wrapper
+    return ProtectedActionWrapper(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
@@ -363,8 +423,7 @@ class _WishlistButton extends StatelessWidget {
   }
 }
 
-// ── Section Header ────────────────────────────────────────────────────────────
-
+// ── Section Header ──
 class _SectionHeader extends StatelessWidget {
   final String title;
   const _SectionHeader({required this.title});
@@ -386,8 +445,7 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-// ── Requirements Card ─────────────────────────────────────────────────────────
-
+// ── Requirements Card ──
 class _ReqCard extends StatelessWidget {
   final String heading;
   final List<String> items;
